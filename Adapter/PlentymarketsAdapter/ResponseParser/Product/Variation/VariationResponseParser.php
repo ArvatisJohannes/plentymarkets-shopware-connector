@@ -528,6 +528,13 @@ class VariationResponseParser implements VariationResponseParserInterface
     private function getPropertiesAsAttribute(array $properties): array
     {
         $attributes = [];
+        $translations = [];
+        $languageIdentifiers[] = $this->identityService->findBy(
+            [
+                'adapterName' => PlentymarketsAdapter::NAME,
+                'objectType' => Language::TYPE,
+            ]
+        );
 
         /**
          * @var Attribute $attribute
@@ -541,6 +548,20 @@ class VariationResponseParser implements VariationResponseParserInterface
             $attribute->setKey('propertyId' . $property['propertyId']);
             $attribute->setValue($property['relationValues'][0]['value']);
             $attribute->setType($this->getPropertyType($property['propertyRelation']));
+
+            foreach ($languageIdentifiers as $languageIdentifier) {
+               if (null === $languageIdentifier['ObjectIdentifier']) {
+                    continue;
+                }
+                $translations[] = Translation::fromArray(
+                    [
+                        'languageIdentifier' => $languageIdentifier['ObjectIdentifier'],
+                        'property' => $property['propertyId'],
+                        'value' => $property['relationValues'][0]['value'],
+                    ]
+                );
+            }
+            $attribute->setTranslations($translations);
 
             $attributes[] = $attribute;
         }
