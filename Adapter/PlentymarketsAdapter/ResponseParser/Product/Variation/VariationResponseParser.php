@@ -537,10 +537,31 @@ class VariationResponseParser implements VariationResponseParserInterface
                 continue;
             }
 
+            $translations = [];
+
+            foreach ($property['relationValues'][0] as $relationValue) {
+                $languageIdentifier = $this->identityService->findOneBy([
+                    'adapterIdentifier' => $relationValue['lang'],
+                    'adapterName' => PlentymarketsAdapter::NAME,
+                    'objectType' => Language::TYPE,
+                ]);
+
+                if (null === $languageIdentifier) {
+                    continue;
+                }
+
+                $translations[] = Translation::fromArray([
+                    'languageIdentifier' => $languageIdentifier->getObjectIdentifier(),
+                    'property' => 'value',
+                    'value' => $relationValue['value'],
+                ]);
+            }
+
             $attribute = new Attribute();
             $attribute->setKey('propertyId' . $property['propertyId']);
             $attribute->setValue($property['relationValues'][0]['value']);
             $attribute->setType($this->getPropertyType($property['propertyRelation']));
+            $attribute->setTranslations($translations);
 
             $attributes[] = $attribute;
         }
