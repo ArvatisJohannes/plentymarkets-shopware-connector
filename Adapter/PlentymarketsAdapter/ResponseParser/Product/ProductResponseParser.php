@@ -153,7 +153,7 @@ class ProductResponseParser implements ProductResponseParserInterface
         $productObject->setAvailableFrom($this->getAvailableFrom($mainVariation));
         $productObject->setAvailableTo($this->getAvailableTo($mainVariation));
         $productObject->setCreatedAt($this->getCreatedAt($mainVariation));
-        $productObject->setAttributes($this->getAttributes($product)); // TODO: Add Translations
+        $productObject->setAttributes($this->getAttributes($product));
         $productObject->setVariantConfiguration($this->getVariantConfiguration($variations));
 
         $result[$productObject->getIdentifier()] = $productObject;

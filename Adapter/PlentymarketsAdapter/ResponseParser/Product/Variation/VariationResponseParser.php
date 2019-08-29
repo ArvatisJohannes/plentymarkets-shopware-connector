@@ -419,7 +419,7 @@ class VariationResponseParser implements VariationResponseParserInterface
                 [
                     'value' => $valueNames[0]['name'],
                     'position' => $valuePosition,
-                    'translations' => $this->getVariationPropertyValueTranslations($valueNames),
+                    'translations' => $this->getVariationPropertyTranslations($valueNames,'name','value'),
                 ]
             );
 
@@ -428,7 +428,7 @@ class VariationResponseParser implements VariationResponseParserInterface
                     'name' => $propertyNames[0]['name'],
                     'position' => $propertyPosition,
                     'values' => [$value],
-                    'translations' => $this->getVariationPropertyTranslations($propertyNames),
+                    'translations' => $this->getVariationPropertyTranslations($propertyNames,'name','name'),
                 ]
             );
         }
@@ -438,10 +438,12 @@ class VariationResponseParser implements VariationResponseParserInterface
 
     /**
      * @param array $names
+     * @param string $source
+     * @param string $destination
      *
      * @return Translation[]
      */
-    private function getVariationPropertyValueTranslations(array $names): array
+    private function getVariationPropertyTranslations(array $names, string $source, string $destination): array
     {
         $translations = [];
 
@@ -461,42 +463,8 @@ class VariationResponseParser implements VariationResponseParserInterface
             $translations[] = Translation::fromArray(
                 [
                     'languageIdentifier' => $languageIdentifier->getObjectIdentifier(),
-                    'property' => 'value',
-                    'value' => $name['name'],
-                ]
-            );
-        }
-
-        return $translations;
-    }
-
-    /**
-     * @param array $names
-     *
-     * @return Translation[]
-     */
-    private function getVariationPropertyTranslations(array $names): array
-    {
-        $translations = [];
-
-        foreach ($names as $name) {
-            $languageIdentifier = $this->identityService->findOneBy(
-                [
-                    'adapterIdentifier' => $name['lang'],
-                    'adapterName' => PlentymarketsAdapter::NAME,
-                    'objectType' => Language::TYPE,
-                ]
-            );
-
-            if (null === $languageIdentifier) {
-                continue;
-            }
-
-            $translations[] = Translation::fromArray(
-                [
-                    'languageIdentifier' => $languageIdentifier->getObjectIdentifier(),
-                    'property' => 'name',
-                    'value' => $name['name'],
+                    'property' => $destination,
+                    'value' => $name[$source],
                 ]
             );
         }
@@ -528,13 +496,6 @@ class VariationResponseParser implements VariationResponseParserInterface
     private function getPropertiesAsAttribute(array $properties): array
     {
         $attributes = [];
-        $translations = [];
-        $languageIdentifiers[] = $this->identityService->findBy(
-            [
-                'adapterName' => PlentymarketsAdapter::NAME,
-                'objectType' => Language::TYPE,
-            ]
-        );
 
         /**
          * @var Attribute $attribute
@@ -548,20 +509,9 @@ class VariationResponseParser implements VariationResponseParserInterface
             $attribute->setKey('propertyId' . $property['propertyId']);
             $attribute->setValue($property['relationValues'][0]['value']);
             $attribute->setType($this->getPropertyType($property['propertyRelation']));
-
-            foreach ($languageIdentifiers as $languageIdentifier) {
-               if (null === $languageIdentifier['ObjectIdentifier']) {
-                    continue;
-                }
-                $translations[] = Translation::fromArray(
-                    [
-                        'languageIdentifier' => $languageIdentifier['ObjectIdentifier'],
-                        'property' => $property['propertyId'],
-                        'value' => $property['relationValues'][0]['value'],
-                    ]
-                );
-            }
-            $attribute->setTranslations($translations);
+            $attribute->setTranslations(
+                $this->getVariationPropertyTranslations($property['relationValues'],'value','value')
+            );
 
             $attributes[] = $attribute;
         }

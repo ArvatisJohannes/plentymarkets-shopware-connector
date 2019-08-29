@@ -296,6 +296,7 @@
             <argument type="service" id="models" />
             <argument type="service" id="shopware_adapter.data_persister.attribute" />
             <argument type="service" id="plenty_connector.logger" />
+            <argument type="service" id="shopware_adapter.data_persister.translation" />
 
             <tag name="plenty_connector.command_handler" />
         </service>

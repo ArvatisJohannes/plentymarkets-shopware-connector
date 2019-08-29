@@ -10,8 +10,10 @@ use SystemConnector\TransferObject\Product\Image\Image;
 use SystemConnector\TransferObject\Product\Price\Price;
 use SystemConnector\TransferObject\Product\Property\Property;
 use SystemConnector\ValueObject\Attribute\Attribute;
+use SystemConnector\ValueObject\Translation\Translation;
+use SystemConnector\TransferObject\TranslatableInterface;
 
-class Variation extends AbstractTransferObject implements AttributableInterface
+class Variation extends AbstractTransferObject implements TranslatableInterface, AttributableInterface
 {
     const TYPE = 'Variation';
 
@@ -151,6 +153,11 @@ class Variation extends AbstractTransferObject implements AttributableInterface
      * @var Attribute[]
      */
     private $attributes = [];
+
+    /**
+     * @var Translation[]
+     */
+    private $translations = [];
 
     /**
      * {@inheritdoc}
@@ -593,6 +600,22 @@ class Variation extends AbstractTransferObject implements AttributableInterface
     }
 
     /**
+     * @return Translation[]
+     */
+    public function getTranslations(): array
+    {
+        return $this->translations;
+    }
+
+    /**
+     * @param Translation[] $translations
+     */
+    public function setTranslations(array $translations)
+    {
+        $this->translations = $translations;
+    }
+
+    /**
      * {@inheritdoc}
      */
     public function getClassProperties()
@@ -625,6 +648,7 @@ class Variation extends AbstractTransferObject implements AttributableInterface
             'weight' => $this->getWeight(),
             'properties' => $this->getProperties(),
             'attributes' => $this->getAttributes(),
+            'translations' => $this->getTranslations(),
         ];
     }
 }
